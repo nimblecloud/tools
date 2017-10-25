@@ -1,0 +1,27 @@
+{"namespace": "data.avro",
+ "type": "record",
+ "name": "Data",
+ "fields": [
+     {"name": "STSN", "type": "string"},
+     {"name": "YWSN",  "type": "string"},
+     {"name": "YWWT",  "type": "string"},
+     {"name": "YWVALUE",  "type": "int"},
+     {"name": "YWTIME",  "type": "string"},
+
+     {"name": "WDSN",  "type": "string"},
+     {"name": "WDWT",  "type": "string"},
+     {"name": "WDVALUE",  "type": "int"},
+     {"name": "WDTIME",  "type": "string"},
+
+     {"name": "YLSN",  "type": "string"},
+     {"name": "YLWT",  "type": "string"},
+     {"name": "YLVALUE",  "type": "int"},
+     {"name": "YLTIME",  "type": "string"},
+
+     {"name": "LLSN",  "type": "string"},
+     {"name": "LLWT",  "type": "string"},
+     {"name": "LLVALUE",  "type": "int"},
+     {"name": "LLDIRECT",  "type": "int"},
+     {"name": "LLTIME",  "type": "string"}
+ ]
+}
