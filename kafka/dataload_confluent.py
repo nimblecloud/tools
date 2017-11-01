@@ -3,38 +3,25 @@
 Copyright (c) 2017, NimbleX .,Ltd.
 
 @author: zhangwenping
-Created on 2017-10-25 17:04
+Created on 2017-10-31 18:36
 """
 import sys
-import io
-import avro.schema
-import avro.io
 import csv
 
-from kafka import KafkaProducer
+from confluent_kafka import avro
+from confluent_kafka.avro import AvroProducer
+
+schema_registry_url = 'http://192.168.10.60:8081'
 
 
-localserver = 'localhost:1234'
+def load(datafile, schema, server, topic):
+    value_schema = avro.load(schema)
+    # key_schema = avro.load('KeySchema.avsc')
 
-schema_file = "schema.avsc"
-
-# Kafka topic
-default_topic = "test_topic"
-
-
-def load(datafile, schema_file, server, topic):
-    def serializer(value):
-        writer = avro.io.DatumWriter(schema)
-        bytes_writer = io.BytesIO()
-        encoder = avro.io.BinaryEncoder(bytes_writer)
-        writer.write(value, encoder)
-        raw_bytes = bytes_writer.getvalue()
-
-        return raw_bytes
-
-    producer = KafkaProducer(bootstrap_servers=server,
-                             value_serializer=serializer)
-    schema = avro.schema.parse(open(schema_file).read())
+    avroProducer = AvroProducer({
+        'bootstrap.servers': server,
+        'schema.registry.url': schema_registry_url},
+        default_value_schema=value_schema)
 
     with open(datafile, 'rb') as csvfile:
         header = csvfile.readline()
@@ -69,16 +56,16 @@ def load(datafile, schema_file, server, topic):
                 'LLTIME': row[17]
             }
 
-            producer.send(topic, data)
+            avroProducer.produce(topic=topic, value=data)
 
-        producer.flush()
+        avroProducer.flush()
 
 
 def main():
     datafile = ''
-    schema = schema_file
-    topic = default_topic
+    topic = ''
     server = 'localhost:1234'
+    schema = ''
 
     if len(sys.argv) == 1:
         print("Usage: \n")

@@ -1,0 +1,1 @@
+/opt/confluent-3.3.0/bin/kafka-avro-console-producer --broker-list 192.168.10.60:6667 --topic test_hdfs_1 --property value.schema='{"type":"record","name":"myrecord","fields":[{"name":"f1","type":"string"}]}'

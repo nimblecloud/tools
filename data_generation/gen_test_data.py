@@ -11,6 +11,12 @@ import random
 import sys
 
 
+GWW = 'GW'  # 高位预警
+DWW = 'DW'  # 低位预警
+FLW = 'FW'  # 第一级报警
+SLW = 'SW'  # 第二级报警
+
+
 def _get_datetime_generator(start, end):
     """
     随机生成一个时间，start和end之间。输入时间格式：2017-08-10
@@ -46,10 +52,9 @@ def YW_warnning_generator():
     high = random.randint(80, 100)
     low = random.randint(1, 20)
     v = random.choice((high, low))
-    if v >= 80:
-        return '高位预警', v
-    else:
-        return '低位预警', v
+
+    info = GWW if v >= 80 else DWW
+    return info, v
 
 
 def WD_warnning_generator():
@@ -57,10 +62,8 @@ def WD_warnning_generator():
     温度报警数据生成器
     """
     value = random.randint(50, 80)
-    if value >= 65:
-        return '第二级报警', value
-    else:
-        return '第一级报警', value
+    info = SLW if value >= 65 else FLW
+    return info, value
 
 
 def YL_warnning_generator():
@@ -68,10 +71,9 @@ def YL_warnning_generator():
     压力报警数据生成器
     """
     value = random.randint(150, 200)
-    if value >= 175:
-        return '第二级报警', value
-    else:
-        return '第一级报警', value
+
+    info = SLW if value >= 175 else FLW
+    return info, value
 
 
 def LL_warnning_generator():
@@ -79,13 +81,10 @@ def LL_warnning_generator():
     流量报警数据生成器
     """
     value = random.randint(300, 400)
-    if value >= 350:
-        t = '第二级报警'
-    else:
-        t = '第一级报警'
 
+    info = SLW if value >= 350 else FLW
     direct = random.choice((1, 2))
-    return t, value, direct
+    return info, value, direct
 
 
 # 储蓄编码
