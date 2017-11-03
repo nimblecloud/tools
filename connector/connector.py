@@ -1,0 +1,238 @@
+# -*- coding: utf-8 -*-
+"""
+@author: zhangwenping
+Created on 2017-11-01 18:10
+"""
+import json
+import requests
+import argparse
+from functools import wraps
+
+hostip = ''
+connecturi = 'http://%s:8083' % hostip
+
+headers = {'Content-type': 'application/json'}
+
+
+def requests_result(func):
+    @wraps(func)
+    def result(*args, **kwargs):
+        r = func(*args, **kwargs)
+        try:
+            print(json.dumps(r.json(), indent=4))
+        except ValueError:
+            print(r.text)
+
+        print 'http status code: ', r.status_code
+        # r.raise_for_status()
+
+    return result
+
+
+def load_config(conf_file):
+    conf = {}
+    with open(conf_file, 'r') as fp:
+        for line in fp:
+            line = line.strip()
+            if line == '' or line.startswith('#'):
+                continue
+            splits = line.split('=')
+            key = splits[0]
+            value = splits[1]
+            conf[key] = value
+    return conf
+
+
+@requests_result
+def connector_list():
+    url = connecturi + '/connectors'
+    return requests.get(url)
+
+
+@requests_result
+def connector_load(name, conf_file):
+    url = connecturi + '/connectors'
+    config = load_config(conf_file)
+    payload = {'name': name, 'config': config}
+    return requests.post(url, data=json.dumps(payload), headers=headers)
+
+
+@requests_result
+def connector_unload(name):
+    # Return 409 (Conflict) if rebalance is in process
+    url = connecturi + '/connectors/' + name
+    return requests.delete(url)
+
+
+@requests_result
+def connector_info(name):
+    url = connecturi + '/connectors/' + name
+    return requests.get(url)
+
+
+@requests_result
+def connector_config_update(name, conf_file):
+    url = connecturi + '/connectors/' + name + '/config'
+    config = load_config(conf_file)
+    return requests.post(url, data=json.dumps(config), headers=headers)
+
+
+@requests_result
+def connector_status(name):
+    url = connecturi + '/connectors/' + name + '/status'
+    return requests.get(url)
+
+
+@requests_result
+def connector_restart(name):
+    # Return 409 (Conflict) if rebalance is in process.
+    url = connecturi + '/connectors/' + name + '/restart'
+    return requests.post(url)
+
+
+@requests_result
+def connector_pause(name):
+    url = connecturi + '/connectors/' + name + '/pause'
+    return requests.put(url)
+
+
+@requests_result
+def connector_resume(name):
+    url = connecturi + '/connectors/' + name + '/resume'
+    return requests.put(url)
+
+
+@requests_result
+def connector_task_list(name):
+    url = connecturi + '/connectors/' + name + '/tasks'
+    return requests.get(url)
+
+
+@requests_result
+def connector_task_status(name, id):
+    url = connecturi + '/connectors/' + name + '/tasks/' + id + '/status'
+    return requests.get(url)
+
+
+@requests_result
+def connector_task_restart(name, id):
+    url = connecturi + '/connectors/' + name + '/tasks/' + id + '/restart'
+    return requests.get(url)
+
+
+@requests_result
+def connector_plugin_list():
+    url = connecturi + '/connector-plugins/'
+    return requests.get(url)
+
+
+@requests_result
+def connector_plugin_config_validate(name, conf_file):
+    config = load_config(conf_file)
+    url = connecturi + '/connector-plugins/' + name + '/config/validate'
+    return requests.put(url, data=json.dumps(config), headers=headers)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest='command', title='commands',
+                                       metavar='')
+    subparsers.add_parser("list", help="Get a list of active connectors")
+
+    load_parser = subparsers.add_parser("load", help="Load a new connector")
+    load_parser.add_argument('name', type=str, help='The connector name')
+    load_parser.add_argument('conf', type=str,
+                             help='The connector config file')
+
+    update_parser = subparsers.add_parser("update",
+                                          help="Update connector config")
+    update_parser.add_argument('name', type=str, help='The connector name')
+    update_parser.add_argument('conf', type=str,
+                               help='The connector config file')
+    
+    unload_parser = subparsers.add_parser("unload",
+                                          help="Unload the connector")
+    unload_parser.add_argument('name', type=str, help='The connector name')
+
+    info_parser = subparsers.add_parser("info",
+                                        help="Get the connector information")
+    info_parser.add_argument('name', type=str, help='The connector name')
+
+    status_parser = subparsers.add_parser("status",
+                                          help="Get the connector status")
+    status_parser.add_argument('name', type=str, help='The connector name')
+
+    restart_parser = subparsers.add_parser("restart",
+                                           help="Restart the connector")
+    restart_parser.add_argument('name', type=str, help='The connector name')
+
+    pause_parser = subparsers.add_parser("pause",
+                                         help="Pause the connector")
+    pause_parser.add_argument('name', type=str, help='The connector name')
+
+    resume_parser = subparsers.add_parser("resume",
+                                          help="Resume the connector")
+    resume_parser.add_argument('name', type=str, help='The connector name')
+
+    task_list = subparsers.add_parser("task-list",
+                                      help="List connector's task info")
+    task_list.add_argument('name', type=str, help='The connector name')
+
+    task_status = subparsers.add_parser("task-status",
+                                        help="Get connector's task status")
+    task_status.add_argument('name', type=str, help='The connector name')
+    task_status.add_argument('taskid', type=str, help='The task id')
+
+    task_restart = subparsers.add_parser("task-restart",
+                                         help="Restart connector's task by id")
+    task_restart.add_argument('name', type=str, help='The connector name')
+    task_restart.add_argument('taskid', type=str, help='The task id')
+
+    subparsers.add_parser("plugin-list",
+                          help="List all installed connector plugins")
+
+    plugin_valid = subparsers.add_parser(
+        "plugin-config-valid", help="Validate the provided configuration")
+    plugin_valid.add_argument(
+        'name', type=str,
+        help='The plugin class name, e.g. `HdfsSinkConnector`')
+    plugin_valid.add_argument('conf', type=str,
+                              help='The plugin config file')
+
+    args = parser.parse_args()
+    cmd = args.command
+
+    if cmd == 'list':
+        connector_list()
+    elif cmd == 'load':
+        connector_load(args.name, args.conf)
+    elif cmd == 'unload':
+        connector_unload(args.name)
+    elif cmd == 'info':
+        connector_info(args.name)
+    elif cmd == 'update':
+        connector_config_update(args.name, args.conf)
+    elif cmd == 'status':
+        connector_status(args.name)
+    elif cmd == 'restart':
+        connector_restart(args.name)
+    elif cmd == 'pause':
+        connector_pause(args.name)
+    elif cmd == 'resume':
+        connector_resume(args.name)
+    elif cmd == 'task-list':
+        connector_task_list(args.name)
+    elif cmd == 'task-status':
+        connector_task_status(args.name, args.taskid)
+    elif cmd == 'task-restart':
+        connector_task_restart(args.name, args.taskid)
+    elif cmd == 'plugin-list':
+        connector_plugin_list()
+    elif cmd == 'plugin-config-valid':
+        connector_plugin_config_validate(args.name, args.conf)
+    else:
+        print 'command not found: ', cmd
+
+
+if __name__ == '__main__':
+    main()
