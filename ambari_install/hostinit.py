@@ -14,6 +14,7 @@ def local_setup():
     run('timedatectl set-timezone Asia/Shanghai')
     run("echo 'export PATH=/usr/jdk64/jdk1.8.0_112/bin/:$PATH' >> ~/.bashrc")
     run("echo 'export BROKER_HOST=%s:6667' >> ~/.bashrc" % env.host_string)
+    run("echo 'export CONNECT_HOST=%s' >> ~/.bashrc" % env.host_string)
 
 
 def dns_setup():

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 @author: zhangwenping
@@ -6,10 +7,17 @@ Created on 2017-11-01 18:10
 import json
 import requests
 import argparse
+import os
+import sys
 from functools import wraps
 
 hostip = ''
-connecturi = 'http://%s:8083' % hostip
+
+ip = os.environ.get('CONNECT_HOST') or hostip
+if not ip:
+    print 'env `CONNECT_HOST` not found and hostip not set'
+    sys.exit(1)
+connecturi = 'http://%s:8083' % ip
 
 headers = {'Content-type': 'application/json'}
 
@@ -74,7 +82,7 @@ def connector_info(name):
 def connector_config_update(name, conf_file):
     url = connecturi + '/connectors/' + name + '/config'
     config = load_config(conf_file)
-    return requests.post(url, data=json.dumps(config), headers=headers)
+    return requests.put(url, data=json.dumps(config), headers=headers)
 
 
 @requests_result
@@ -117,7 +125,7 @@ def connector_task_status(name, id):
 @requests_result
 def connector_task_restart(name, id):
     url = connecturi + '/connectors/' + name + '/tasks/' + id + '/restart'
-    return requests.get(url)
+    return requests.post(url)
 
 
 @requests_result
