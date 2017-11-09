@@ -157,7 +157,7 @@ def main():
     update_parser.add_argument('name', type=str, help='The connector name')
     update_parser.add_argument('conf', type=str,
                                help='The connector config file')
-    
+
     unload_parser = subparsers.add_parser("unload",
                                           help="Unload the connector")
     unload_parser.add_argument('name', type=str, help='The connector name')

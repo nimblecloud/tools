@@ -110,7 +110,7 @@ LL_number_generator = _get_serial_number_generator("LLSN", 1, 1000)
 time_generator = _get_datetime_generator('2017-07-01', '2017-09-30')
 
 
-def gen_test_data(schema, server, topic, n=10000,):
+def gen_test_data(schema, server, topic, n=10000, t=0):
     value_schema = avro.load(schema)
     # key_schema = avro.load('KeySchema.avsc')
 
@@ -168,14 +168,15 @@ def gen_test_data(schema, server, topic, n=10000,):
         }
 
         avroProducer.produce(topic=topic, value=data)
-        # time.sleep(1)
+        if t != 0:
+            time.sleep(t)
 
     avroProducer.flush()
 
 
 def main():
 
-    if len(sys.argv) != 5:
+    if len(sys.argv) < 5:
         print("Usage: \n")
         print("python dataload.py schema server_address topic number")
         print("e.g. python dataload_avro.py test_data.csv "
@@ -186,8 +187,12 @@ def main():
     server = sys.argv[2]
     topic = sys.argv[3]
     n = int(sys.argv[4])
+    t = 0
 
-    gen_test_data(schema, server, topic, n)
+    if len(sys.argv) == 6:
+        t = int(sys.argv[5])
+
+    gen_test_data(schema, server, topic, n, t)
 
 
 if __name__ == '__main__':

@@ -3,7 +3,8 @@
 username = 'root'
 password = '111111'
 
-# NET Work
+# NET Work，注意这里最好单独一个网段
+# netmask只能是8/16/24段，一般用24就够用，即：255.255.255.0
 subnet = ''
 netmask = '255.255.255.0'
 
