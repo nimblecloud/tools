@@ -45,7 +45,7 @@ def disable_selinux():
 def set_hostname(hostname=None):
     if not hostname:
         hostname = ut.get_domain_name_by_ip(env.host_string)
-    run('hostnamectl set-hostname ' + hostname)
+    run("echo '%s %s' >> /etc/hosts" % (env.host_string, hostname))
 
 
 def swap_config():
