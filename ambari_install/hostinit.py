@@ -45,7 +45,9 @@ def disable_selinux():
 def set_hostname(hostname=None):
     if not hostname:
         hostname = ut.get_domain_name_by_ip(env.host_string)
+    # hosts文件必须设置，否则如果一个节点有多个域名的话，socket的函数在获取hostname时会随机
     run("echo '%s %s' >> /etc/hosts" % (env.host_string, hostname))
+    run('hostnamectl set-hostname ' + hostname)
 
 
 def swap_config():
