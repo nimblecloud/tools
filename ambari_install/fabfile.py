@@ -280,3 +280,11 @@ def install(skipssh=''):
     execute(setup_ntp)
     execute(install_postgresql_server)
     execute(setup_ambari_server)
+
+
+@task
+@hosts((conf.db_server))
+def re_init_db():
+    psql.create_ambari_postgres_db()
+    psql.create_hive_postgres_db()
+    psql.create_oozie_postgres_db()

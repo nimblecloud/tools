@@ -47,7 +47,7 @@ def install_ntp_client():
 
     ntp_dname = 'ntp.'+conf.domain_name
 
-    retry = 3
+    retry = 5
     while retry:
         with settings(warn_only=True):
             out = run('ntpdate -u ' + ntp_dname)

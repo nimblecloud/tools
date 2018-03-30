@@ -122,7 +122,7 @@ def create_oozie_postgres_db():
 
 def _drop_postgres_db_and_user(dbname, username): 
     run_as_postgres_user('drop DATABASE IF EXISTS %s;' % dbname)
-    run_as_postgres_user('drop user IF EXISTS %s;' % username)                             
+    run_as_postgres_user('drop user IF EXISTS %s;' % username)
 
 
 def clean_ambari_postgres_db():
