@@ -153,11 +153,13 @@ def install_dns_server():
 
     # create zone file
     domains = {}
+    dnames = {}
     for name, ip in conf.all_domain_nodes:
         domain = name + '.' + conf.domain_name
         domains[domain] = ip
+        dnames[name] = ip
 
-    _create_zone_file(domains)
+    _create_zone_file(dnames)
     _create_reverse_file(domains)
 
     # 检测配置文件有效性
